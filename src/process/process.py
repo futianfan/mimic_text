@@ -3,6 +3,10 @@ import numpy as np
 import pandas as pd
 from collections import Counter, defaultdict
 from time import time
+import csv
+import os
+import gensim.models
+from tqdm import tqdm
 
 sys.path.append('./')		#print(os.getcwd())
 from src.glob_variable import * 
@@ -13,7 +17,10 @@ assert data_folder == '/Users/futianfan/Downloads/Gatech_Courses/mimic_text/data
 assert mimic3_folder == '/Users/futianfan/Downloads/Gatech_Courses/mimic_text/data/mimic3'
 
 
+'''
+STEP 1-5  notes_labeled.csv 
 
+'''
 
 #### 1. combine procedure.csv and diagnosis.csv => ALL_CODES.csv
 '''
@@ -123,21 +130,15 @@ print('compute num of word for notes_labeled.csv cost {} seconds '.format(int(ti
 
 
 
-####  7.  Create train/dev/test splits
+####  7.  Create train/dev/test splits && Build vocabulary from training data 
 '''
 t1 = time()
 fname = '%s/notes_labeled.csv' % mimic3_folder
 base_name = "%s/disch" % mimic3_folder 	#	for output
 tr, dv, te = utils.split_data(fname, base_name=base_name)	### output is disch_dev_split.csv, disch_train_split.csv, disch_test_split.csv
-print('train/dev/test splits cost {} seconds '.format(int(time() - t1)))
-### 20 seconds
-'''
-
-'''
-## Build vocabulary from training data 
 vocab_min = 3
 vname = '%s/vocab.csv' % mimic3_folder
-build_vocab.build_vocab(vocab_min, tr, vname)
+utils.build_vocab(vocab_min, tr, vname)
 ## Sort each data split by length for batching
 for splt in ['train', 'dev', 'test']:
     filename = '%s/disch_%s_split.csv' % (mimic3_folder, splt)
@@ -145,15 +146,26 @@ for splt in ['train', 'dev', 'test']:
     df['length'] = df.apply(lambda row: len(str(row['TEXT']).split()), axis=1)
     df = df.sort_values(['length'])
     df.to_csv('%s/%s_full.csv' % (mimic3_folder, splt), index=False)
+print(' train/dev/test splits && Build vocabulary from training data  cost {} seconds '.format(int(time() - t1)))
+'''
+#### 205 seconds
 
+####  8.  word embeddings
+'''
+t1 = time()
 ## Pre-train word embeddings
-w2v_file = word_embeddings.word_embeddings('full', '%s/disch_full.csv' % mimic3_folder, 100, 0, 5)
+w2v_file = utils.word_embeddings('full', '%s/disch_full.csv' % mimic3_folder, 100, 0, 5)				## output is processed_full.w2v  
+Y = 'full' #use all available labels in the dataset for prediction
 ## Write pre-trained word embeddings with new vocab
-extract_wvs.gensim_to_embeddings('%s/processed_full.w2v' % mimic3_folder, '%s/vocab.csv' % mimic3_folder, Y)
+utils.gensim_to_embeddings('%s/processed_full.w2v' % mimic3_folder, '%s/vocab.csv' % mimic3_folder, Y)		## output is processed_full.embed 
 ## Pre-process code descriptions using the vocab
-vocab_index_descriptions.vocab_index_descriptions('%s/vocab.csv' % mimic3_folder, '%s/description_vectors.vocab' % mimic3_folder)
+utils.vocab_index_descriptions('%s/vocab.csv' % mimic3_folder, '%s/description_vectors.vocab' % mimic3_folder)   ## output is description_vectors.vocab
+print(' word embedding cost {} seconds '.format(int(time() - t1)))  ### 12 seconds
+'''
 ################################################################################################
-## Filter each split to the top 50 diagnosis/procedure codes 
+####  9.  Filter each split to the top 50 diagnosis/procedure codes 
+t1 = time()
+## 9.1 find the top-50 codes 
 Y = 50
 counts = Counter()
 dfnl = pd.read_csv('%s/notes_labeled.csv' % mimic3_folder)
@@ -169,6 +181,7 @@ with open('%s/TOP_%s_CODES.csv' % (mimic3_folder, str(Y)), 'w') as of:
     for code in codes_50:
         w.writerow([code])
 
+## 9.2 filter out some hadm code not in hadm_ids
 for splt in ['train', 'dev', 'test']:
     print(splt)
     hadm_ids = set()
@@ -192,16 +205,17 @@ for splt in ['train', 'dev', 'test']:
                     w.writerow(row[:3] + [';'.join(filtered_codes)])
                     i += 1
 
+## 9.3 sort by length
 for splt in ['train', 'dev', 'test']:
     filename = '%s/%s_%s.csv' % (mimic3_folder, splt, str(Y))
     df = pd.read_csv(filename)
     df['length'] = df.apply(lambda row: len(str(row['TEXT']).split()), axis=1)
     df = df.sort_values(['length'])
     df.to_csv('%s/%s_%s.csv' % (mimic3_folder, splt, str(Y)), index=False)
+print(' filter cost {} seconds '.format(int(time() - t1)))  ### 53 seconds
 
 
 
-'''
 
 
 
