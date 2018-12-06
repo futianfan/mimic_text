@@ -163,7 +163,8 @@ utils.vocab_index_descriptions('%s/vocab.csv' % mimic3_folder, '%s/description_v
 print(' word embedding cost {} seconds '.format(int(time() - t1)))  ### 12 seconds
 '''
 ################################################################################################
-####  9.  Filter each split to the top 50 diagnosis/procedure codes 
+####  9.  Filter each split to the top 50 diagnosis/procedure codes
+''' 
 t1 = time()
 ## 9.1 find the top-50 codes 
 Y = 50
@@ -214,7 +215,7 @@ for splt in ['train', 'dev', 'test']:
     df.to_csv('%s/%s_%s.csv' % (mimic3_folder, splt, str(Y)), index=False)
 print(' filter cost {} seconds '.format(int(time() - t1)))  ### 53 seconds
 
-
+'''
 
 
 

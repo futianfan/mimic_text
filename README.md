@@ -7,15 +7,23 @@ the data-processing part rely heavily on
 original input:
 
 data
+
 |   D_ICD_DIAGNOSES.csv
+
 |   D_ICD_PROCEDURES.csv
+
 └───mimic3/
+
 |   |   NOTEEVENTS.csv
+
 |   |   DIAGNOSES_ICD.csv
+
 |   |   PROCEDURES_ICD.csv
+
 |   |   *_hadm_ids.csv
 
 
-
+====How to run=====
+./run.sh
 
 
