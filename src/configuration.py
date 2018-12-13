@@ -1,8 +1,11 @@
 import json, os
-from glob_variable import current_folder, data_folder, mimic3_folder
 
 def get_config():
 	config = {}
+	current_folder = '/Users/futianfan/Downloads/Gatech_Courses/mimic_text/' 
+	data_folder = os.path.join(current_folder, 'data')
+	mimic3_folder = os.path.join(data_folder, 'mimic3')
+
 	config['embed_file'] = os.path.join(mimic3_folder, 'processed_full.embed')
 	config['train_file'] = os.path.join(mimic3_folder, 'train_50.csv')
 	config['dev_file'] = os.path.join(mimic3_folder, 'dev_50.csv')
@@ -18,10 +21,15 @@ def get_config():
 
 	#### CNN 
 	config['embed_dim'] = 100 
-	config['cnn_out_channel'] = 150 
+	assert config['embed_dim'] == 100 
+	config['cnn_out_channel'] = 250 
 	config['cnn_kernel_size'] = 10
 	config['cnn_stride'] = 1 
 	config['cnn_padding'] = 0
+
+
+	#### train
+	config['learning_rate'] = 1e-2
 
 	return config
 

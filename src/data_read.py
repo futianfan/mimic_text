@@ -46,6 +46,7 @@ class CSV_Data_Reader:
 			self.batch_size = batch_size
 			self.num_of_iter_in_epoch = int(np.ceil(self.total_num / self.batch_size))
 			self.max_length = max_length
+			self.code_size = len(code2idx)
 			
 			self.batch_id = 0 
 			self.random_idx = np.arange(self.total_num)
@@ -83,7 +84,14 @@ class CSV_Data_Reader:
 		### zero-padding
 		text_seq = torch.LongTensor(text_seq)
 		text_embedding = embedding(text_seq)
-		return text_embedding, [self.code[i] for i in indx]
+
+		code_seq = [self.code[i] for i in indx]
+		code_mat = np.zeros((len(code_seq), self.code_size))
+		for i, j in enumerate(code_seq):
+			for k in j:
+				code_mat[i,k] = 1
+	
+		return text_embedding, code_mat
 
 	### to do 1. data => embedding + padding: word => idx + padding => embedding 
 	### to do 2. label => idx 
