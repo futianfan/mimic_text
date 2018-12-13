@@ -31,6 +31,9 @@ def get_config():
 	#### train
 	config['learning_rate'] = 1e-2
 
+	#### test
+	config['test_size'] = 1729 
+
 	return config
 
 '''

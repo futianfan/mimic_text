@@ -30,6 +30,7 @@ src/
 	configuration.py
 	train.py
 
+	config -> data -> model -> train -> 
 
 ====How to run=====
 ./run.sh

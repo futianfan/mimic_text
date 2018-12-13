@@ -51,7 +51,7 @@ class CNN_Model(nn.Module):
 		Xmaxpool = F.max_pool1d(torch.tanh(Xconv), kernel_size=Xconv.size()[2])	### 32, 150, 1
 		Xmaxpool = Xmaxpool.squeeze(2)
 		Xout = torch.sigmoid(self.fc(Xmaxpool))  ### batch_size, num_class
-		return self._get_loss(Xout, y)
+		return self._get_loss(Xout, y), Xout, y 
 		#return Xout
 
 
