@@ -23,6 +23,14 @@ data
 |   |   *_hadm_ids.csv
 
 
+====source code====
+src/
+	data_reader.py
+	model.py
+	configuration.py
+	train.py
+
+
 ====How to run=====
 ./run.sh
 
